@@ -1,13 +1,15 @@
 require 'formula'
 
 class Concurrencykit < Formula
-  url 'http://concurrencykit.org/releases/ck-0.1.4.tar.gz'
   homepage 'http://concurrencykit.org'
-  md5 '11f6f2145d12c48fd17845b39f492ceb'
+  url 'http://concurrencykit.org/releases/ck-0.2.15.tar.gz'
+  sha1 'eea1aef0178f4d728164b3b2dda8ebededc62832'
+
   head 'git://git.concurrencykit.org/ck.git'
 
   def install
     system "./configure", "--prefix=#{prefix}"
+    system "make", "CC=#{ENV.cc}"
     system "make install"
   end
 end

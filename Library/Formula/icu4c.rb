@@ -1,24 +1,34 @@
 require 'formula'
 
 class Icu4c < Formula
-  url 'http://download.icu-project.org/files/icu4c/4.8.1.1/icu4c-4_8_1_1-src.tgz'
   homepage 'http://site.icu-project.org/'
-  md5 'ea93970a0275be6b42f56953cd332c17'
-  version '4.8.1.1'
+  url 'http://download.icu-project.org/files/icu4c/50.1/icu4c-50_1-src.tgz'
+  version '50.1'
+  sha1 '9a3369c00a8be8eff935d2893849ad2eb246c0ef'
 
   bottle do
-    url 'https://downloads.sf.net/project/machomebrew/Bottles/icu4c-4.8.1.1-bottle.tar.gz'
-    sha1 '51b6e6e735ea581a2736127414e600362846b7e1'
+    revision 2
+    sha1 '34c2ab788c5ca698c1902d3d6c38db0461f8b100' => :mountain_lion
+    sha1 '899afa2267843f7204583884885f2c05f8189ddc' => :lion
+    sha1 'a54cbdd33dbdcb0fd8ed2441580e91e8ff114640' => :snow_leopard
   end
 
   keg_only "Conflicts; see: https://github.com/mxcl/homebrew/issues/issue/167"
 
+  option :universal
+
+  fails_with :clang do
+    cause "Icu will turn on C++11 mode when built with clang, which causes incompatibilities."
+  end
+
   def install
+    ENV.universal_binary if build.universal?
+
     ENV.append "LDFLAGS", "-headerpad_max_install_names"
-    config_flags = ["--prefix=#{prefix}", "--disable-samples", "--enable-static"]
-    config_flags << "--with-library-bits=64" if MacOS.prefer_64_bit?
-    Dir.chdir "source" do
-      system "./configure", *config_flags
+    args = ["--prefix=#{prefix}", "--disable-samples", "--disable-tests", "--enable-static"]
+    args << "--with-library-bits=64" if MacOS.prefer_64_bit?
+    cd "source" do
+      system "./configure", *args
       system "make"
       system "make install"
     end

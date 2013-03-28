@@ -1,27 +1,35 @@
 require 'formula'
 
 class Openssl < Formula
-  url 'http://www.openssl.org/source/openssl-0.9.8s.tar.gz'
-  version '0.9.8s'
-  homepage 'http://www.openssl.org'
-  sha1 'a7410b0991f37e125bf835dfd1315822fca64d56'
+  homepage 'http://openssl.org'
+  url 'http://openssl.org/source/openssl-1.0.1e.tar.gz'
+  sha256 'f74f15e8c8ff11aa3d5bb5f276d202ec18d7246e95f961db76054199c69c1ae3'
 
   keg_only :provided_by_osx,
-    "The OpenSSL provided by Leopard (0.9.7) is too old for some software."
+    "The OpenSSL provided by OS X is too old for some software."
 
   def install
-    system "./config", "--prefix=#{prefix}",
-                       "--openssldir=#{etc}/openssl",
-                       "zlib-dynamic", "shared"
+    args = %W[./Configure
+               --prefix=#{prefix}
+               --openssldir=#{etc}/openssl
+               zlib-dynamic
+               shared
+             ]
+
+    args << (MacOS.prefer_64_bit? ? "darwin64-x86_64-cc" : "darwin-i386-cc")
+
+    system "perl", *args
 
     ENV.deparallelize # Parallel compilation fails
     system "make"
-    system "make test"
-    system "make install MANDIR=#{man} MANSUFFIX=ssl"
+    system "make", "test"
+    system "make", "install", "MANDIR=#{man}", "MANSUFFIX=ssl"
   end
 
   def caveats; <<-EOS.undent
-    Note that the libraries built tend to be 32-bit only, even on Snow Leopard.
+    To install updated CA certs from Mozilla.org:
+
+        brew install curl-ca-bundle
     EOS
   end
 end

@@ -1,12 +1,18 @@
 require 'formula'
 
 class Pari < Formula
-  url 'http://pari.math.u-bordeaux.fr/pub/pari/unix/pari-2.5.0.tar.gz'
   homepage 'http://pari.math.u-bordeaux.fr/'
-  md5 '0b595a1345679ff482785a686c863e9f'
+  url 'http://pari.math.u-bordeaux.fr/pub/pari/unix/pari-2.5.3.tar.gz'
+  sha1 'de79eee7ae017a495dc0c648b6f7d5a4f6c7a522'
+
+  depends_on 'readline'
 
   def install
-    system "./Configure", "--prefix=#{prefix}"
+    readline = Formula.factory 'readline'
+    system "./Configure", "--prefix=#{prefix}",
+                          "--without-gmp",
+                          "--with-readline-include=#{readline.include}",
+                          "--with-readline-lib=#{readline.lib}"
     # make needs to be done in two steps
     system "make all"
     system "make install"
